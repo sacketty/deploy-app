@@ -1,0 +1,55 @@
+#!/bin/bash
+# Argument = -t test -r server -p password -v
+
+usage()
+{
+cat << EOF
+usage: $0 options
+
+Deploy the app on a could service and pushing to origin
+
+OPTIONS:
+   -h      Show this message
+   -b      Branch to merge with master before deploy (default=staging)
+   -c      Remote cloud service (default=heroku)
+EOF
+}
+
+BRANCH="staging"
+CLOUD="heroku"
+VERBOSE=
+while getopts “hb:c:v” OPTION
+do
+     case $OPTION in
+         h)
+             usage
+             exit 1
+             ;;
+         b)
+             BRANCH=$OPTARG
+             ;;
+         c)
+             CLOUD=$OPTARG
+             ;;
+         v)
+             VERBOSE=1
+             ;;
+         ?)
+             usage
+             exit
+             ;;
+     esac
+done
+
+if [[ -z $BRANCH ]] || [[ -z $CLOUD ]]
+then
+     usage
+     exit 1
+else
+	echo "proceeding ..."
+	git checkout master
+	git merge $BRANCH
+	git checkout $BRANCH
+	jgit push origin master
+	git push $CLOUD master
+fi
